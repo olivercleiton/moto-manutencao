@@ -1,0 +1,1647 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MotoManutenção - Controle para Motoboys</title>
+    <meta name="theme-color" content="#006400">
+    <meta name="description" content="Aplicativo para motoboys controlarem a manutenção de suas motos">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="MotoManutenção">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #006400;
+            --secondary-color: #ff8c00;
+            --light-color: #f5f5f5;
+            --dark-color: #333;
+        }
+        
+        /* Estilos da Tela de Login */
+        #loginScreen {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f8f9fa;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        
+        .login-container {
+            max-width: 400px;
+            width: 100%;
+            padding: 20px;
+        }
+        
+        .login-card {
+            border-radius: 15px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            border: none;
+            overflow: hidden;
+        }
+        
+        .login-header {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 25px 20px;
+            text-align: center;
+        }
+        
+        .login-body {
+            padding: 30px;
+            background-color: white;
+        }
+        
+        .password-toggle {
+            position: absolute;
+            right: 10px;
+            top: 50%;
+            transform: translateY(-50%);
+            background: none;
+            border: none;
+            color: #6c757d;
+            cursor: pointer;
+        }
+        
+        .password-toggle:hover {
+            color: var(--primary-color);
+        }
+        
+        .password-container {
+            position: relative;
+        }
+        
+        .login-footer {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e9ecef;
+        }
+        
+        .logo {
+            font-size: 2rem;
+            margin-bottom: 10px;
+        }
+        
+        .forgot-password {
+            text-align: right;
+            margin-top: 10px;
+        }
+        
+        .forgot-password a {
+            color: var(--primary-color);
+            text-decoration: none;
+        }
+        
+        .forgot-password a:hover {
+            text-decoration: underline;
+        }
+        
+        .register-link {
+            margin-top: 15px;
+            text-align: center;
+        }
+        
+        .register-link a {
+            color: var(--primary-color);
+            text-decoration: none;
+            font-weight: 500;
+        }
+        
+        .register-link a:hover {
+            text-decoration: underline;
+        }
+
+        /* Estilos do Aplicativo Principal */
+        #appScreen {
+            display: none;
+        }
+        
+        body.app-loaded {
+            background-color: #f8f9fa;
+            padding-bottom: 80px;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        
+        .navbar {
+            background-color: var(--primary-color);
+        }
+        
+        .btn-primary {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+        }
+        
+        .btn-primary:hover {
+            background-color: #004d00;
+            border-color: #004d00;
+        }
+        
+        .btn-warning {
+            background-color: var(--secondary-color);
+            border-color: var(--secondary-color);
+        }
+        
+        .card {
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin-bottom: 20px;
+            border: none;
+        }
+        
+        .card-header {
+            border-radius: 10px 10px 0 0 !important;
+            background-color: var(--primary-color);
+            color: white;
+        }
+        
+        .main-tabs .nav-link {
+            color: var(--dark-color);
+            font-weight: 500;
+        }
+        
+        .main-tabs .nav-link.active {
+            color: var(--primary-color);
+            font-weight: 600;
+            border-bottom: 3px solid var(--primary-color);
+            background: transparent;
+        }
+        
+        .service-badge {
+            font-size: 0.8rem;
+            padding: 5px 10px;
+            border-radius: 20px;
+        }
+        
+        .stats-card {
+            text-align: center;
+            padding: 15px;
+        }
+        
+        .stats-number {
+            font-size: 2rem;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
+        
+        .floating-btn {
+            position: fixed;
+            bottom: 80px;
+            right: 20px;
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            background-color: var(--primary-color);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.3);
+            z-index: 1000;
+        }
+        
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            background: white;
+            box-shadow: 0 -2px 10px rgba(0, 0, 0, 0.1);
+            z-index: 1000;
+        }
+        
+        .service-item {
+            border-left: 4px solid var(--primary-color);
+            transition: transform 0.2s;
+        }
+        
+        .service-item:hover {
+            transform: translateX(5px);
+        }
+        
+        .maintenance-due {
+            border-left: 4px solid #dc3545;
+        }
+        
+        .maintenance-soon {
+            border-left: 4px solid #ffc107;
+        }
+        
+        .cost-summary {
+            background: linear-gradient(135deg, #006400 0%, #008000 100%);
+            color: white;
+            border-radius: 10px;
+        }
+        
+        .motorcycle-img {
+            max-width: 100%;
+            height: auto;
+            border-radius: 10px;
+        }
+        
+        .vehicle-selector {
+            cursor: pointer;
+            transition: all 0.3s;
+            position: relative;
+        }
+        
+        .vehicle-selector:hover, .vehicle-selector.active {
+            transform: scale(1.05);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .vehicle-selector.active {
+            border: 2px solid var(--primary-color);
+        }
+        
+        .delete-vehicle-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            background: #dc3545;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            opacity: 0.7;
+            transition: opacity 0.3s;
+        }
+        
+        .delete-vehicle-btn:hover {
+            opacity: 1;
+        }
+        
+        .chart-container {
+            height: 250px;
+        }
+        
+        .maintenance-config-item {
+            border-left: 4px solid #6c757d;
+            padding-left: 10px;
+            margin-bottom: 10px;
+        }
+
+        .user-menu {
+            color: white;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Tela de Login -->
+    <div id="loginScreen">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <div class="logo">
+                        <i class="fas fa-motorcycle"></i>
+                    </div>
+                    <h2>MotoManutenção</h2>
+                    <p class="mb-0">Controle de manutenção para motoboys</p>
+                </div>
+                <div class="login-body">
+                    <form id="loginForm">
+                        <div class="mb-3">
+                            <label for="email" class="form-label">E-mail</label>
+                            <input type="email" class="form-control" id="email" placeholder="seu@email.com" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="password" class="form-label">Senha</label>
+                            <div class="password-container">
+                                <input type="password" class="form-control" id="password" placeholder="Sua senha" required>
+                                <button type="button" class="password-toggle" id="togglePassword">
+                                    <i class="fas fa-eye"></i>
+                                </button>
+                            </div>
+                        </div>
+                        <div class="forgot-password">
+                            <a href="#" id="forgotPassword">Esqueci minha senha</a>
+                        </div>
+                        <div class="d-grid gap-2 mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">Entrar</button>
+                        </div>
+                    </form>
+                    <div class="register-link">
+                        <p>Não tem uma conta? <a href="#" id="registerLink">Cadastre-se</a></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Aplicativo Principal (inicialmente oculto) -->
+    <div id="appScreen">
+        <!-- Barra de navegação -->
+        <nav class="navbar navbar-expand-lg navbar-dark">
+            <div class="container">
+                <a class="navbar-brand" href="#">
+                    <i class="fas fa-motorcycle me-2"></i>MotoManutenção
+                </a>
+                <div class="d-flex">
+                    <button class="btn btn-outline-light me-2" id="contrastToggle">
+                        <i class="fas fa-adjust"></i>
+                    </button>
+                    <div class="dropdown">
+                        <button class="btn btn-outline-light dropdown-toggle" type="button" id="userDropdown" data-bs-toggle="dropdown">
+                            <i class="fas fa-user me-1"></i>
+                            <span id="userName">Usuário</span>
+                        </button>
+                        <ul class="dropdown-menu">
+                            <li><a class="dropdown-item" href="#" id="logoutBtn"><i class="fas fa-sign-out-alt me-2"></i>Sair</a></li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </nav>
+
+        <div class="container mt-4">
+            <!-- Seletor de Veículos -->
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h5 class="card-title mb-0">Meus Veículos</h5>
+                </div>
+                <div class="card-body">
+                    <div class="row" id="vehiclesList">
+                        <!-- Veículos serão carregados aqui -->
+                    </div>
+                    <div class="text-center mt-3">
+                        <button class="btn btn-outline-primary" data-bs-toggle="modal" data-bs-target="#addVehicleModal">
+                            <i class="fas fa-plus me-1"></i>Adicionar Veículo
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Abas principais -->
+            <ul class="nav nav-tabs main-tabs mb-4" id="mainTabs" role="tablist">
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home" type="button" role="tab">Início</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="services-tab" data-bs-toggle="tab" data-bs-target="#services" type="button" role="tab">Serviços</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="stats-tab" data-bs-toggle="tab" data-bs-target="#stats" type="button" role="tab">Estatísticas</button>
+                </li>
+                <li class="nav-item" role="presentation">
+                    <button class="nav-link" id="config-tab" data-bs-toggle="tab" data-bs-target="#config" type="button" role="tab">Configurações</button>
+                </li>
+            </ul>
+
+            <!-- Conteúdo das abas -->
+            <div class="tab-content" id="mainTabsContent">
+                <!-- Aba Início -->
+                <div class="tab-pane fade show active" id="home" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0" id="currentVehicleTitle">Minha Moto</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="text-center mb-3">
+                                        <img src="https://cdn-icons-png.flaticon.com/512/3073/3073471.png" alt="Moto" class="motorcycle-img" style="max-height: 150px;">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Modelo</label>
+                                        <input type="text" class="form-control" id="bikeModel">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Ano</label>
+                                        <input type="number" class="form-control" id="bikeYear">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Placa</label>
+                                        <input type="text" class="form-control" id="bikePlate">
+                                    </div>
+                                    <div class="mb-3">
+                                        <label class="form-label">Quilometragem atual</label>
+                                        <input type="number" class="form-control" id="currentMileage">
+                                    </div>
+                                    <div class="d-grid gap-2">
+                                        <button class="btn btn-primary" id="saveBikeInfo">Salvar Informações</button>
+                                        <button class="btn btn-outline-danger" id="resetVehicleBtn">Resetar Histórico</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Próximas Manutenções</h5>
+                                </div>
+                                <div class="card-body" id="maintenanceAlerts">
+                                    <!-- Alertas de manutenção serão carregados aqui -->
+                                </div>
+                            </div>
+                            
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">Histórico Recente</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div id="recentServices">
+                                        <!-- Serviços recentes serão carregados aqui -->
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Serviços -->
+                <div class="tab-pane fade" id="services" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Registrar Novo Serviço</h5>
+                        </div>
+                        <div class="card-body">
+                            <form id="serviceForm">
+                                <div class="mb-3">
+                                    <label class="form-label">Tipo de Serviço</label>
+                                    <select class="form-select" id="serviceType" required>
+                                        <option value="">Selecione o tipo de serviço</option>
+                                        <option value="Troca de óleo">Troca de óleo</option>
+                                        <option value="Troca de pneu">Troca de pneu</option>
+                                        <option value="Ajuste de freios">Ajuste de freios</option>
+                                        <option value="Troca de correia">Troca de correia</option>
+                                        <option value="Revisão geral">Revisão geral</option>
+                                        <option value="Outro">Outro</option>
+                                    </select>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Data do Serviço</label>
+                                    <input type="date" class="form-control" id="serviceDate" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Quilometragem</label>
+                                    <input type="number" class="form-control" id="serviceMileage" required>
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Custo (R$)</label>
+                                    <input type="number" class="form-control" id="serviceCost" step="0.01">
+                                </div>
+                                <div class="mb-3">
+                                    <label class="form-label">Observações</label>
+                                    <textarea class="form-control" id="serviceNotes" rows="2"></textarea>
+                                </div>
+                                <button type="submit" class="btn btn-primary w-100">Registrar Serviço</button>
+                            </form>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header d-flex justify-content-between align-items-center">
+                            <h5 class="card-title mb-0">Histórico de Serviços</h5>
+                            <div>
+                                <input type="text" class="form-control form-control-sm" placeholder="Buscar..." id="serviceSearch">
+                            </div>
+                        </div>
+                        <div class="card-body">
+                            <div class="list-group" id="servicesList">
+                                <!-- Serviços serão carregados aqui -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Estatísticas -->
+                <div class="tab-pane fade" id="stats" role="tabpanel">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <i class="fas fa-tachometer-alt fa-2x mb-2 text-primary"></i>
+                                    <h3 class="stats-number" id="totalMileage">0</h3>
+                                    <p class="card-text">Quilômetros rodados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <i class="fas fa-tools fa-2x mb-2 text-primary"></i>
+                                    <h3 class="stats-number" id="totalServices">0</h3>
+                                    <p class="card-text">Serviços realizados</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <i class="fas fa-money-bill-wave fa-2x mb-2 text-primary"></i>
+                                    <h3 class="stats-number" id="totalCost">R$ 0</h3>
+                                    <p class="card-text">Total gasto</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Custos por Categoria</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="chart-container">
+                                <canvas id="costChart" height="250"></canvas>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-body cost-summary">
+                            <h5 class="card-title">Resumo de Custos</h5>
+                            <div class="row">
+                                <div class="col-6">
+                                    <p>Média mensal:</p>
+                                    <h4 id="monthlyAverage">R$ 0,00</h4>
+                                </div>
+                                <div class="col-6">
+                                    <p>Próxima revisão:</p>
+                                    <h4 id="nextMaintenance">0 km</h4>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Aba Configurações -->
+                <div class="tab-pane fade" id="config" role="tabpanel">
+                    <div class="card">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Configurações de Manutenção</h5>
+                        </div>
+                        <div class="card-body">
+                            <p class="text-muted">Defina os intervalos de quilometragem para cada tipo de serviço. O sistema irá alertar quando estiver próximo da próxima manutenção.</p>
+                            
+                            <div id="maintenanceConfig">
+                                <!-- Configurações de manutenção serão carregadas aqui -->
+                            </div>
+                            
+                            <div class="mt-3">
+                                <button class="btn btn-primary" id="saveMaintenanceConfig">
+                                    <i class="fas fa-save me-1"></i>Salvar Configurações
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="card mt-4">
+                        <div class="card-header">
+                            <h5 class="card-title mb-0">Gerenciar Veículos</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="alert alert-info">
+                                <i class="fas fa-info-circle me-2"></i>
+                                Selecione um veículo para excluí-lo permanentemente. Esta ação não pode ser desfeita.
+                            </div>
+                            
+                            <div class="list-group" id="vehicleManagementList">
+                                <!-- Lista de veículos para gerenciamento -->
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Botão flutuante para adicionar serviço -->
+        <div class="floating-btn" data-bs-toggle="modal" data-bs-target="#addServiceModal">
+            <i class="fas fa-plus"></i>
+        </div>
+
+        <!-- Navegação inferior -->
+        <div class="bottom-nav">
+            <div class="container">
+                <div class="d-flex justify-content-around py-2">
+                    <button class="btn btn-link text-dark" onclick="switchTab('home')">
+                        <i class="fas fa-home fa-lg"></i>
+                        <br>
+                        <small>Início</small>
+                    </button>
+                    <button class="btn btn-link text-dark" onclick="switchTab('services')">
+                        <i class="fas fa-tools fa-lg"></i>
+                        <br>
+                        <small>Serviços</small>
+                    </button>
+                    <button class="btn btn-link text-dark" onclick="switchTab('stats')">
+                        <i class="fas fa-chart-bar fa-lg"></i>
+                        <br>
+                        <small>Estatísticas</small>
+                    </button>
+                    <button class="btn btn-link text-dark" onclick="switchTab('config')">
+                        <i class="fas fa-cog fa-lg"></i>
+                        <br>
+                        <small>Configurações</small>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modais (mantidos do código original) -->
+    <!-- Modal para adicionar veículo -->
+    <div class="modal fade" id="addVehicleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Adicionar Novo Veículo</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="vehicleForm">
+                        <div class="mb-3">
+                            <label class="form-label">Nome do Veículo</label>
+                            <input type="text" class="form-control" id="vehicleName" required placeholder="Ex: CG 160 Titan">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Modelo</label>
+                            <input type="text" class="form-control" id="vehicleModel" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Ano</label>
+                            <input type="number" class="form-control" id="vehicleYear" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Placa</label>
+                            <input type="text" class="form-control" id="vehiclePlate">
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quilometragem atual</label>
+                            <input type="number" class="form-control" id="vehicleMileage" required>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" id="saveVehicleBtn">Salvar Veículo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal para adicionar serviço (para mobile) -->
+    <div class="modal fade" id="addServiceModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Registrar Novo Serviço</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="mobileServiceForm">
+                        <div class="mb-3">
+                            <label class="form-label">Tipo de Serviço</label>
+                            <select class="form-select" id="mobileServiceType" required>
+                                <option value="">Selecione o tipo de serviço</option>
+                                <option value="Troca de óleo">Troca de óleo</option>
+                                <option value="Troca de pneu">Troca de pneu</option>
+                                <option value="Ajuste de freios">Ajuste de freios</option>
+                                <option value="Troca de correia">Troca de correia</option>
+                                <option value="Revisão geral">Revisão geral</option>
+                                <option value="Outro">Outro</option>
+                            </select>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Data do Serviço</label>
+                            <input type="date" class="form-control" id="mobileServiceDate" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Quilometragem</label>
+                            <input type="number" class="form-control" id="mobileServiceMileage" required>
+                        </div>
+                        <div class="mb-3">
+                            <label class="form-label">Custo (R$)</label>
+                            <input type="number" class="form-control" id="mobileServiceCost" step="0.01">
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-primary" onclick="addServiceFromMobile()">Salvar</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação para resetar histórico -->
+    <div class="modal fade" id="resetConfirmModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Reset</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja resetar o histórico deste veículo? Todos os serviços registrados serão excluídos permanentemente. Esta ação não pode ser desfeita.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmResetBtn">Resetar Histórico</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modal de confirmação para excluir veículo -->
+    <div class="modal fade" id="deleteVehicleModal" tabindex="-1" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Confirmar Exclusão</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Tem certeza que deseja excluir este veículo? Todos os dados, incluindo serviços registrados, serão excluídos permanentemente. Esta ação não pode ser desfeita.</p>
+                    <p class="fw-bold" id="vehicleToDeleteName"></p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancelar</button>
+                    <button type="button" class="btn btn-danger" id="confirmDeleteVehicleBtn">Excluir Veículo</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // ========== SISTEMA DE LOGIN ==========
+        document.addEventListener('DOMContentLoaded', function() {
+            // Verificar se já está logado
+            checkLoginStatus();
+            
+            // Configurar eventos do login
+            setupLoginEvents();
+        });
+
+        function checkLoginStatus() {
+            const isLoggedIn = localStorage.getItem('userLoggedIn');
+            const userName = localStorage.getItem('userName');
+            
+            if (isLoggedIn === 'true' && userName) {
+                showAppScreen(userName);
+            } else {
+                showLoginScreen();
+            }
+        }
+
+        function setupLoginEvents() {
+            // Alternar visibilidade da senha
+            const togglePassword = document.getElementById('togglePassword');
+            const passwordInput = document.getElementById('password');
+            
+            if (togglePassword && passwordInput) {
+                togglePassword.addEventListener('click', function() {
+                    const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                    passwordInput.setAttribute('type', type);
+                    
+                    // Alterar o ícone
+                    this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+                });
+            }
+            
+            // Processar login
+            const loginForm = document.getElementById('loginForm');
+            if (loginForm) {
+                loginForm.addEventListener('submit', function(e) {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('email').value;
+                    const password = document.getElementById('password').value;
+                    
+                    if (!email || !password) {
+                        alert('Por favor, preencha todos os campos.');
+                        return;
+                    }
+                    
+                    // Simulação de login bem-sucedido
+                    // Em um sistema real, você validaria as credenciais no servidor
+                    const userName = email.split('@')[0];
+                    localStorage.setItem('userLoggedIn', 'true');
+                    localStorage.setItem('userName', userName);
+                    localStorage.setItem('userEmail', email);
+                    
+                    showAppScreen(userName);
+                    
+                    // Limpar o formulário
+                    document.getElementById('loginForm').reset();
+                });
+            }
+            
+            // Cadastro rápido (simulação)
+            const registerLink = document.getElementById('registerLink');
+            if (registerLink) {
+                registerLink.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    
+                    const email = prompt('Digite seu e-mail para cadastro:');
+                    if (email) {
+                        const password = prompt('Crie uma senha (mínimo 6 caracteres):');
+                        if (password && password.length >= 6) {
+                            const userName = email.split('@')[0];
+                            localStorage.setItem('userLoggedIn', 'true');
+                            localStorage.setItem('userName', userName);
+                            localStorage.setItem('userEmail', email);
+                            
+                            showAppScreen(userName);
+                            alert('Cadastro realizado com sucesso!');
+                        } else {
+                            alert('Senha deve ter pelo menos 6 caracteres.');
+                        }
+                    }
+                });
+            }
+            
+            // Recuperação de senha
+            const forgotPassword = document.getElementById('forgotPassword');
+            if (forgotPassword) {
+                forgotPassword.addEventListener('click', function(e) {
+                    e.preventDefault();
+                    alert('Funcionalidade de recuperação de senha seria implementada aqui.');
+                });
+            }
+        }
+
+        function showLoginScreen() {
+            document.getElementById('loginScreen').style.display = 'flex';
+            document.getElementById('appScreen').style.display = 'none';
+            document.body.classList.remove('app-loaded');
+        }
+
+        function showAppScreen(userName) {
+            document.getElementById('loginScreen').style.display = 'none';
+            document.getElementById('appScreen').style.display = 'block';
+            document.body.classList.add('app-loaded');
+            
+            // Atualizar nome do usuário
+            document.getElementById('userName').textContent = userName;
+            
+            // Inicializar o aplicativo
+            initializeApp();
+        }
+
+        function logout() {
+            localStorage.removeItem('userLoggedIn');
+            localStorage.removeItem('userName');
+            localStorage.removeItem('userEmail');
+            showLoginScreen();
+        }
+
+        // ========== APLICATIVO PRINCIPAL ==========
+        // Dados iniciais do aplicativo
+        let vehicles = [];
+        let currentVehicleId = null;
+        let services = [];
+        let costChart = null;
+        let maintenanceConfig = {};
+
+        // Configurações padrão de manutenção preventiva
+        const defaultMaintenanceIntervals = {
+            "Troca de óleo": 5000,
+            "Troca de pneu": 10000,
+            "Ajuste de freios": 7000,
+            "Troca de correia": 15000,
+            "Revisão geral": 10000,
+            "Outro": 0
+        };
+
+        // Cores para o gráfico (uma para cada tipo de serviço)
+        const chartColors = [
+            'rgba(0, 100, 0, 0.7)',      // Verde
+            'rgba(255, 140, 0, 0.7)',    // Laranja
+            'rgba(50, 50, 200, 0.7)',    // Azul
+            'rgba(200, 50, 50, 0.7)',    // Vermelho
+            'rgba(150, 50, 200, 0.7)',   // Roxo
+            'rgba(50, 150, 150, 0.7)'    // Ciano
+        ];
+
+        function initializeApp() {
+            // Configurar data atual como padrão para o formulário
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('serviceDate').value = today;
+            document.getElementById('mobileServiceDate').value = today;
+            
+            // Carregar dados salvos
+            loadSavedData();
+            
+            // Inicializar event listeners
+            setupEventListeners();
+            
+            // Se não houver veículos, criar um padrão
+            if (vehicles.length === 0) {
+                createDefaultVehicle();
+            } else {
+                // Selecionar o primeiro veículo
+                selectVehicle(vehicles[0].id);
+            }
+            
+            // Carregar configurações de manutenção
+            loadMaintenanceConfig();
+            
+            // Configurar botão de logout
+            document.getElementById('logoutBtn').addEventListener('click', logout);
+        }
+
+        // O restante do código do aplicativo permanece igual...
+        // [Todo o código JavaScript do aplicativo original aqui]
+        // Configurar event listeners
+        function setupEventListeners() {
+            // Formulário de serviço (versão desktop)
+            document.getElementById('serviceForm').addEventListener('submit', function(e) {
+                e.preventDefault();
+                addServiceFromForm();
+            });
+            
+            // Botão de salvar veículo
+            document.getElementById('saveVehicleBtn').addEventListener('click', addNewVehicle);
+            
+            // Botão de salvar informações do veículo
+            document.getElementById('saveBikeInfo').addEventListener('click', saveVehicleInfo);
+            
+            // Botão de resetar histórico
+            document.getElementById('resetVehicleBtn').addEventListener('click', function() {
+                const modal = new bootstrap.Modal(document.getElementById('resetConfirmModal'));
+                modal.show();
+            });
+            
+            // Confirmação de reset
+            document.getElementById('confirmResetBtn').addEventListener('click', resetVehicleHistory);
+            
+            // Busca de serviços
+            document.getElementById('serviceSearch').addEventListener('input', handleSearch);
+            
+            // Alternar modo de alto contraste
+            document.getElementById('contrastToggle').addEventListener('click', toggleContrastMode);
+            
+            // Salvar configurações de manutenção
+            document.getElementById('saveMaintenanceConfig').addEventListener('click', saveMaintenanceConfig);
+            
+            // Confirmação de exclusão de veículo
+            document.getElementById('confirmDeleteVehicleBtn').addEventListener('click', deleteVehicle);
+        }
+
+        // Carregar dados salvos
+        function loadSavedData() {
+            const savedVehicles = localStorage.getItem('motoVehicles');
+            if (savedVehicles) {
+                vehicles = JSON.parse(savedVehicles);
+            }
+            
+            const savedServices = localStorage.getItem('motoServices');
+            if (savedServices) {
+                services = JSON.parse(savedServices);
+            }
+            
+            const lastVehicleId = localStorage.getItem('currentVehicleId');
+            if (lastVehicleId) {
+                currentVehicleId = lastVehicleId;
+            }
+            
+            // Carregar preferência de contraste
+            if (localStorage.getItem('highContrast') === 'true') {
+                document.body.classList.add('high-contrast');
+            }
+        }
+
+        // Carregar configurações de manutenção
+        function loadMaintenanceConfig() {
+            const savedConfig = localStorage.getItem('maintenanceConfig');
+            if (savedConfig) {
+                maintenanceConfig = JSON.parse(savedConfig);
+            } else {
+                // Usar configurações padrão
+                maintenanceConfig = {...defaultMaintenanceIntervals};
+                localStorage.setItem('maintenanceConfig', JSON.stringify(maintenanceConfig));
+            }
+            
+            renderMaintenanceConfig();
+        }
+
+        // Renderizar configurações de manutenção
+        function renderMaintenanceConfig() {
+            const configContainer = document.getElementById('maintenanceConfig');
+            configContainer.innerHTML = '';
+            
+            for (const [type, interval] of Object.entries(maintenanceConfig)) {
+                if (type === "Outro") continue; // Não mostrar configuração para "Outro"
+                
+                const configItem = document.createElement('div');
+                configItem.className = 'maintenance-config-item';
+                configItem.innerHTML = `
+                    <label class="form-label">${type} (a cada quantos km?)</label>
+                    <div class="input-group mb-2">
+                        <input type="number" class="form-control maintenance-interval" data-type="${type}" value="${interval}" min="0">
+                        <span class="input-group-text">km</span>
+                    </div>
+                `;
+                
+                configContainer.appendChild(configItem);
+            }
+            
+            // Renderizar lista de veículos para gerenciamento
+            renderVehicleManagementList();
+        }
+
+        // Renderizar lista de veículos para gerenciamento
+        function renderVehicleManagementList() {
+            const managementList = document.getElementById('vehicleManagementList');
+            managementList.innerHTML = '';
+            
+            if (vehicles.length === 0) {
+                managementList.innerHTML = '<p class="text-center text-muted">Nenhum veículo cadastrado.</p>';
+                return;
+            }
+            
+            vehicles.forEach(vehicle => {
+                const listItem = document.createElement('div');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.innerHTML = `
+                    <div>
+                        <h6 class="mb-1">${vehicle.name}</h6>
+                        <small class="text-muted">${vehicle.model} - ${vehicle.plate || 'Sem placa'}</small>
+                    </div>
+                    <button class="btn btn-outline-danger btn-sm" onclick="confirmDeleteVehicle('${vehicle.id}')">
+                        <i class="fas fa-trash"></i> Excluir
+                    </button>
+                `;
+                
+                managementList.appendChild(listItem);
+            });
+        }
+
+        // Salvar configurações de manutenção
+        function saveMaintenanceConfig() {
+            const intervalInputs = document.querySelectorAll('.maintenance-interval');
+            
+            intervalInputs.forEach(input => {
+                const type = input.dataset.type;
+                const interval = parseInt(input.value) || 0;
+                maintenanceConfig[type] = interval;
+            });
+            
+            localStorage.setItem('maintenanceConfig', JSON.stringify(maintenanceConfig));
+            updateMaintenanceAlerts();
+            
+            alert('Configurações salvas com sucesso!');
+        }
+
+        // Confirmar exclusão de veículo
+        function confirmDeleteVehicle(vehicleId) {
+            const vehicle = vehicles.find(v => v.id === vehicleId);
+            if (!vehicle) return;
+            
+            document.getElementById('vehicleToDeleteName').textContent = `${vehicle.name} (${vehicle.model})`;
+            
+            // Armazenar o ID do veículo a ser excluído em um atributo do botão
+            document.getElementById('confirmDeleteVehicleBtn').dataset.vehicleId = vehicleId;
+            
+            const modal = new bootstrap.Modal(document.getElementById('deleteVehicleModal'));
+            modal.show();
+        }
+
+        // Excluir veículo
+        function deleteVehicle() {
+            const vehicleId = document.getElementById('confirmDeleteVehicleBtn').dataset.vehicleId;
+            
+            // Remover veículo da lista
+            vehicles = vehicles.filter(v => v.id !== vehicleId);
+            
+            // Remover serviços associados ao veículo
+            services = services.filter(s => s.vehicleId !== vehicleId);
+            
+            // Salvar alterações
+            saveVehiclesToStorage();
+            localStorage.setItem('motoServices', JSON.stringify(services));
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('deleteVehicleModal'));
+            modal.hide();
+            
+            // Se era o veículo atual, selecionar outro (se houver)
+            if (currentVehicleId === vehicleId) {
+                if (vehicles.length > 0) {
+                    selectVehicle(vehicles[0].id);
+                } else {
+                    currentVehicleId = null;
+                    createDefaultVehicle();
+                }
+            }
+            
+            // Atualizar listas
+            renderVehiclesList();
+            renderVehicleManagementList();
+            
+            alert('Veículo excluído com sucesso!');
+        }
+
+        // Criar veículo padrão se não houver nenhum
+        function createDefaultVehicle() {
+            const defaultVehicle = {
+                id: Date.now().toString(),
+                name: "Minha Moto",
+                model: "Honda CG 160 Titan",
+                year: 2020,
+                plate: "ABC1D23",
+                mileage: 18500
+            };
+            
+            vehicles.push(defaultVehicle);
+            currentVehicleId = defaultVehicle.id;
+            saveVehiclesToStorage();
+            renderVehiclesList();
+            renderVehicleManagementList();
+            loadVehicleData(currentVehicleId);
+        }
+
+        // Adicionar novo veículo
+        function addNewVehicle() {
+            const name = document.getElementById('vehicleName').value.trim();
+            const model = document.getElementById('vehicleModel').value.trim();
+            const year = document.getElementById('vehicleYear').value;
+            const plate = document.getElementById('vehiclePlate').value.trim();
+            const mileage = document.getElementById('vehicleMileage').value;
+            
+            if (!name || !model || !year || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            const newVehicle = {
+                id: Date.now().toString(),
+                name: name,
+                model: model,
+                year: parseInt(year),
+                plate: plate,
+                mileage: parseInt(mileage)
+            };
+            
+            vehicles.push(newVehicle);
+            saveVehiclesToStorage();
+            renderVehiclesList();
+            renderVehicleManagementList();
+            
+            // Selecionar o novo veículo
+            selectVehicle(newVehicle.id);
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
+            modal.hide();
+            
+            // Limpar o formulário
+            document.getElementById('vehicleForm').reset();
+            
+            alert('Veículo adicionado com sucesso!');
+        }
+
+        // Renderizar lista de veículos
+        function renderVehiclesList() {
+            const vehiclesList = document.getElementById('vehiclesList');
+            vehiclesList.innerHTML = '';
+            
+            vehicles.forEach(vehicle => {
+                const vehicleElement = document.createElement('div');
+                vehicleElement.className = `col-md-4 mb-3 vehicle-selector ${vehicle.id === currentVehicleId ? 'active' : ''}`;
+                vehicleElement.innerHTML = `
+                    <div class="card h-100" onclick="selectVehicle('${vehicle.id}')">
+                        <button class="delete-vehicle-btn" onclick="event.stopPropagation(); confirmDeleteVehicle('${vehicle.id}')">
+                            <i class="fas fa-times"></i>
+                        </button>
+                        <div class="card-body text-center">
+                            <i class="fas fa-motorcycle fa-2x mb-2"></i>
+                            <h6 class="card-title">${vehicle.name}</h6>
+                            <p class="card-text small">${vehicle.model}<br>${vehicle.plate || 'Sem placa'}</p>
+                        </div>
+                    </div>
+                `;
+                
+                vehiclesList.appendChild(vehicleElement);
+            });
+        }
+
+        // Selecionar veículo
+        function selectVehicle(vehicleId) {
+            currentVehicleId = vehicleId;
+            localStorage.setItem('currentVehicleId', vehicleId);
+            renderVehiclesList();
+            loadVehicleData(vehicleId);
+        }
+
+        // Carregar dados do veículo selecionado
+        function loadVehicleData(vehicleId) {
+            const vehicle = vehicles.find(v => v.id === vehicleId);
+            if (!vehicle) return;
+            
+            // Preencher formulário de informações
+            document.getElementById('currentVehicleTitle').textContent = vehicle.name;
+            document.getElementById('bikeModel').value = vehicle.model;
+            document.getElementById('bikeYear').value = vehicle.year;
+            document.getElementById('bikePlate').value = vehicle.plate || '';
+            document.getElementById('currentMileage').value = vehicle.mileage;
+            
+            // Atualizar serviços e estatísticas
+            updateServicesList();
+            updateStats();
+            updateMaintenanceAlerts();
+            updateRecentServices();
+        }
+
+        // Salvar informações do veículo
+        function saveVehicleInfo() {
+            const vehicleIndex = vehicles.findIndex(v => v.id === currentVehicleId);
+            if (vehicleIndex === -1) return;
+            
+            vehicles[vehicleIndex].model = document.getElementById('bikeModel').value;
+            vehicles[vehicleIndex].year = document.getElementById('bikeYear').value;
+            vehicles[vehicleIndex].plate = document.getElementById('bikePlate').value;
+            const newMileage = parseInt(document.getElementById('currentMileage').value);
+            
+            // Atualizar a quilometragem apenas se for maior que a anterior
+            if (newMileage >= vehicles[vehicleIndex].mileage) {
+                vehicles[vehicleIndex].mileage = newMileage;
+            } else {
+                alert('A quilometragem não pode ser menor que a anterior.');
+                document.getElementById('currentMileage').value = vehicles[vehicleIndex].mileage;
+                return;
+            }
+            
+            saveVehiclesToStorage();
+            updateStats();
+            updateMaintenanceAlerts();
+            
+            alert('Informações salvas com sucesso!');
+        }
+
+        // Resetar histórico do veículo
+        function resetVehicleHistory() {
+            if (!currentVehicleId) return;
+            
+            // Filtrar serviços, mantendo apenas os de outros veículos
+            services = services.filter(service => service.vehicleId !== currentVehicleId);
+            
+            // Salvar alterações
+            localStorage.setItem('motoServices', JSON.stringify(services));
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('resetConfirmModal'));
+            modal.hide();
+            
+            // Atualizar a interface
+            updateServicesList();
+            updateStats();
+            updateMaintenanceAlerts();
+            updateRecentServices();
+            
+            alert('Histórico resetado com sucesso!');
+        }
+
+        // Salvar veículos no localStorage
+        function saveVehiclesToStorage() {
+            localStorage.setItem('motoVehicles', JSON.stringify(vehicles));
+        }
+
+        // Adicionar serviço a partir do formulário principal
+        function addServiceFromForm() {
+            const type = document.getElementById('serviceType').value;
+            const date = document.getElementById('serviceDate').value;
+            const mileage = document.getElementById('serviceMileage').value;
+            const cost = document.getElementById('serviceCost').value;
+            const notes = document.getElementById('serviceNotes').value;
+            
+            if (!type || !date || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            addService(type, date, mileage, cost, notes);
+            
+            // Limpar o formulário
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Adicionar serviço a partir do modal mobile
+        function addServiceFromMobile() {
+            const type = document.getElementById('mobileServiceType').value;
+            const date = document.getElementById('mobileServiceDate').value;
+            const mileage = document.getElementById('mobileServiceMileage').value;
+            const cost = document.getElementById('mobileServiceCost').value;
+            
+            if (!type || !date || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            addService(type, date, mileage, cost, "");
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addServiceModal'));
+            modal.hide();
+            
+            // Limpar o formulário
+            document.getElementById('mobileServiceForm').reset();
+            document.getElementById('mobileServiceDate').value = new Date().toISOString().split('T')[0];
+        }
+
+        // Função principal para adicionar serviço
+        function addService(type, date, mileage, cost, notes) {
+            const newService = {
+                id: Date.now().toString(),
+                vehicleId: currentVehicleId,
+                type: type,
+                date: date,
+                mileage: parseInt(mileage),
+                cost: cost ? parseFloat(cost) : 0,
+                notes: notes
+            };
+            
+            services.push(newService);
+            localStorage.setItem('motoServices', JSON.stringify(services));
+            
+            // Atualizar a quilometragem atual se for maior que a atual
+            const vehicleIndex = vehicles.findIndex(v => v.id === currentVehicleId);
+            if (vehicleIndex !== -1 && parseInt(mileage) > vehicles[vehicleIndex].mileage) {
+                vehicles[vehicleIndex].mileage = parseInt(mileage);
+                document.getElementById('currentMileage').value = mileage;
+                saveVehiclesToStorage();
+            }
+            
+            updateServicesList();
+            updateStats();
+            updateMaintenanceAlerts();
+            updateRecentServices();
+            
+            alert('Serviço registrado com sucesso!');
+        }
+
+        // Atualizar a lista de serviços
+        function updateServicesList() {
+            const servicesList = document.getElementById('servicesList');
+            servicesList.innerHTML = '';
+            
+            const vehicleServices = services
+                .filter(service => service.vehicleId === currentVehicleId)
+                .sort((a, b) => b.mileage - a.mileage);
+            
+            if (vehicleServices.length === 0) {
+                servicesList.innerHTML = '<p class="text-center text-muted">Nenhum serviço registrado para este veículo.</p>';
+                return;
+            }
+            
+            vehicleServices.forEach(service => {
+                const serviceDate = new Date(service.date).toLocaleDateString('pt-BR');
+                
+                const serviceItem = document.createElement('div');
+                serviceItem.className = 'list-group-item service-item';
+                serviceItem.innerHTML = `
+                    <div class="d-flex w-100 justify-content-between">
+                        <h6 class="mb-1">${service.type}</h6>
+                        <small>${service.mileage} km</small>
+                    </div>
+                    <p class="mb-1">${service.notes || 'Sem observações'}</p>
+                    <div class="d-flex justify-content-between">
+                        <small>${serviceDate}</small>
+                        <strong>R$ ${service.cost.toFixed(2)}</strong>
+                    </div>
+                `;
+                
+                servicesList.appendChild(serviceItem);
+            });
+        }
+
+        // Atualizar alertas de manutenção
+        function updateMaintenanceAlerts() {
+            const alertsContainer = document.getElementById('maintenanceAlerts');
+            alertsContainer.innerHTML = '';
+            
+            const vehicle = vehicles.find(v => v.id === currentVehicleId);
+            if (!vehicle) return;
+            
+            const vehicleServices = services.filter(service => service.vehicleId === currentVehicleId);
+            const currentMileage = vehicle.mileage;
+            
+            // Agrupar serviços por tipo e pegar o mais recente de cada tipo
+            const lastServicesByType = {};
+            vehicleServices.forEach(service => {
+                if (!lastServicesByType[service.type] || service.mileage > lastServicesByType[service.type].mileage) {
+                    lastServicesByType[service.type] = service;
+                }
+            });
+            
+            // Verificar necessidades de manutenção para cada tipo de serviço
+            let hasAlerts = false;
+            
+            for (const [type, interval] of Object.entries(maintenanceConfig)) {
+                if (interval === 0) continue; // Pular serviços sem intervalo definido
+                
+                const lastService = lastServicesByType[type];
+                const nextServiceMileage = lastService ? lastService.mileage + interval : interval;
+                const mileageLeft = nextServiceMileage - currentMileage;
+                
+                if (mileageLeft <= 0) {
+                    // Manutenção atrasada
+                    alertsContainer.innerHTML += `
+                        <div class="alert alert-danger">
+                            <i class="fas fa-exclamation-circle me-2"></i>
+                            <strong>${type}</strong> está atrasada - recomendado a cada ${interval.toLocaleString()} km
+                        </div>
+                    `;
+                    hasAlerts = true;
+                } else if (mileageLeft <= interval * 0.2) {
+                    // Manutenção próxima (20% ou menos da vida útil)
+                    alertsContainer.innerHTML += `
+                        <div class="alert alert-warning">
+                            <i class="fas fa-exclamation-triangle me-2"></i>
+                            <strong>${type}</strong> está próxima (${mileageLeft.toLocaleString()} km restantes) - recomendado a cada ${interval.toLocaleString()} km
+                        </div>
+                    `;
+                    hasAlerts = true;
+                }
+            }
+            
+            if (!hasAlerts) {
+                alertsContainer.innerHTML = '<p class="text-center text-muted">Nenhuma manutenção próxima necessária.</p>';
+            }
+        }
+
+        // Atualizar serviços recentes na aba inicial
+        function updateRecentServices() {
+            const recentContainer = document.getElementById('recentServices');
+            recentContainer.innerHTML = '';
+            
+            const vehicleServices = services
+                .filter(service => service.vehicleId === currentVehicleId)
+                .sort((a, b) => new Date(b.date) - new Date(a.date))
+                .slice(0, 5); // Últimos 5 serviços
+            
+            if (vehicleServices.length === 0) {
+                recentContainer.innerHTML = '<p class="text-center text-muted">Nenhum serviço registrado.</p>';
+                return;
+            }
+            
+            const listGroup = document.createElement('ul');
+            listGroup.className = 'list-group';
+            
+            vehicleServices.forEach(service => {
+                const serviceDate = new Date(service.date).toLocaleDateString('pt-BR');
+                
+                const listItem = document.createElement('li');
+                listItem.className = 'list-group-item d-flex justify-content-between align-items-center';
+                listItem.innerHTML = `
+                    ${service.type}
+                    <span class="badge bg-primary rounded-pill">${service.mileage.toLocaleString()} km</span>
+                    <small class="text-muted">${serviceDate}</small>
+                `;
+                
+                listGroup.appendChild(listItem);
+            });
+            
+            recentContainer.appendChild(listGroup);
+        }
+
+        // Atualizar estatísticas
+        function updateStats() {
+            const vehicle = vehicles.find(v => v.id === currentVehicleId);
+            if (!vehicle) return;
+            
+            const vehicleServices = services.filter(service => service.vehicleId === currentVehicleId);
+            const totalServices = vehicleServices.length;
+            const totalCost = vehicleServices.reduce((sum, service) => sum + service.cost, 0);
+            
+            document.getElementById('totalMileage').textContent = vehicle.mileage.toLocaleString();
+            document.getElementById('totalServices').textContent = totalServices;
+            document.getElementById('totalCost').textContent = `R$ ${totalCost.toFixed(2)}`;
+            
+            // Calcular média mensal (considerando últimos 6 meses)
+            const sixMonthsAgo = new Date();
+            sixMonthsAgo.setMonth(sixMonthsAgo.getMonth() - 6);
+            
+            const recentServices = vehicleServices.filter(service => {
+                return new Date(service.date) >= sixMonthsAgo;
+            });
+            
+            const recentCost = recentServices.reduce((sum, service) => sum + service.cost, 0);
+            const monthlyAverage = recentCost / 6;
+            
+            document.getElementById('monthlyAverage').textContent = `R$ ${monthlyAverage.toFixed(2)}`;
+            
+            // Calcular próxima revisão baseada no último serviço de revisão geral
+            const lastGeneralService = vehicleServices
+                .filter(service => service.type === "Revisão geral")
+                .sort((a, b) => b.mileage - a.mileage)[0];
+            
+            let nextMaintenance = 0;
+            if (lastGeneralService) {
+                nextMaintenance = lastGeneralService.mileage + maintenanceConfig["Revisão geral"];
+            } else if (vehicleServices.length > 0) {
+                // Se não houver revisão geral, usar o serviço mais recente + intervalo padrão
+                const lastService = vehicleServices.sort((a, b) => b.mileage - a.mileage)[0];
+                nextMaintenance = lastService.mileage + 10000;
+            } else {
+                // Se não houver serviços, usar a quilometragem atual + intervalo padrão
+                nextMaintenance = vehicle.mileage + 10000;
+            }
+            
+            document.getElementById('nextMaintenance').textContent = `${nextMaintenance.toLocaleString()} km`;
+            
+            // Atualizar gráfico de custos
+            updateCostChart(vehicleServices);
+        }
+
+        // Atualizar gráfico de custos
+        function updateCostChart(vehicleServices) {
+            const ctx = document.getElementById('costChart').getContext('2d');
+            
+            // Agrupar custos por tipo de serviço
+            const costByType = {};
+            vehicleServices.forEach(service => {
+                if (!costByType[service.type]) {
+                    costByType[service.type] = 0;
+                }
+                costByType[service.type] += service.cost;
+            });
+            
+            // Preparar dados para o gráfico
+            const labels = Object.keys(costByType);
+            const data = Object.values(costByType);
+            
+            // Destruir gráfico existente se houver
+            if (costChart) {
+                costChart.destroy();
+            }
+            
+            // Criar novo gráfico
+            costChart = new Chart(ctx, {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Custo por tipo de serviço (R$)',
+                        data: data,
+                        backgroundColor: chartColors.slice(0, labels.length),
+                        borderColor: 'rgb(0, 100, 0)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: function(value) {
+                                    return 'R$ ' + value;
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        }
+                    }
+                }
+            });
+        }
+
+        // Manipular busca de serviços
+        function handleSearch(e) {
+            const searchTerm = e.target.value.toLowerCase();
+            const serviceItems = document.querySelectorAll('.service-item');
+            
+            serviceItems.forEach(item => {
+                const text = item.textContent.toLowerCase();
+                if (text.includes(searchTerm)) {
+                    item.style.display = 'block';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Alternar modo de alto contraste
+        function toggleContrastMode() {
+            document.body.classList.toggle('high-contrast');
+            const isHighContrast = document.body.classList.contains('high-contrast');
+            localStorage.setItem('highContrast', isHighContrast);
+        }
+
+        // Função para alternar entre abas
+        function switchTab(tabName) {
+            const tab = document.querySelector(`#${tabName}-tab`);
+            if (tab) {
+                const tabInstance = new bootstrap.Tab(tab);
+                tabInstance.show();
+            }
+        }
+    </script>
+</body>
+</html>

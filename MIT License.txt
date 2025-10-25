@@ -1,0 +1,18 @@
+
+**3. Crie também um `package.json` na pasta principal:**
+
+```json
+{
+  "name": "moto-manutencao",
+  "version": "1.0.0",
+  "description": "Sistema completo para controle de manutenção de motos",
+  "scripts": {
+    "dev:backend": "cd moto-manutencao-backend && npm run dev",
+    "start:backend": "cd moto-manutencao-backend && npm start",
+    "dev:frontend": "cd frontend && node server.js",
+    "install:all": "cd moto-manutencao-backend && npm install && cd ../frontend && npm install"
+  },
+  "keywords": ["moto", "manutencao", "motoboy", "controle"],
+  "author": "Seu Nome",
+  "license": "MIT"
+}

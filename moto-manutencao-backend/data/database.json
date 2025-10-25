@@ -1,0 +1,13 @@
+{
+  "users": [
+    {
+      "id": "1761404922588",
+      "name": "Cleiton Rodrigues",
+      "email": "olivercleiton@gmail.com",
+      "password": "$2a$10$/H0rIrQ0pMMHbK8Ee7liBOTHWbcF04tFXxH2RXQy8Dd2fda108rAC",
+      "createdAt": "2025-10-25T15:08:42.588Z"
+    }
+  ],
+  "vehicles": [],
+  "services": []
+}
