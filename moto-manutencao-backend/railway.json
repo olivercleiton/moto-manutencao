@@ -1,0 +1,7 @@
+{
+  "build": {
+    "builder": "NIXPACKS",
+    "buildCommand": "cd moto-manutencao-backend && [seu-comando-de-build]",
+    "startCommand": "cd moto-manutencao-backend && [seu-comando-de-start]"
+  }
+}
