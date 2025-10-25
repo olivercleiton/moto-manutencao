@@ -773,6 +773,10 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
+
+	// Configuração da URL da API
+	const API_BASE_URL = 'https://moto-manutencao-production.up.railway.app';
+
         // ========== SISTEMA DE LOGIN ==========
         document.addEventListener('DOMContentLoaded', function() {
             // Verificar se já está logado
@@ -946,39 +950,41 @@
             'rgba(50, 150, 150, 0.7)'    // Ciano
         ];
         // ========== CONFIGURAÇÃO DA API ==========
-        const API_URL = 'http://localhost:3000/api';
+        
         let authToken = localStorage.getItem('token');
 
         // Função para fazer requisições autenticadas
-        async function apiRequest(url, options = {}) {
-        const config = {
+        // Função para fazer requisições autenticadas
+	async function apiRequest(endpoint, options = {}) {
+    	const config = {
+        method: options.method || 'GET',
         headers: {
             'Content-Type': 'application/json',
             ...options.headers
         },
-        ...options
-        };
+        body: options.body
+    	};
 
-        if (authToken) {
+	    if (authToken) {
         config.headers.Authorization = `Bearer ${authToken}`;
-        }
+    	}
 
-        try {
-        const response = await fetch(`${API_URL}${url}`, config);
+	    try {
+        const response = await fetch(`${API_BASE_URL}${endpoint}`, config);
         
         if (response.status === 401) {
             // Token inválido, fazer logout
-            handleLogout();
+            logout();
             return null;
         }
 
-        const data = await response.json();
-        return { ok: response.ok, data };
-        } catch (error) {
-        console.error('Erro na requisição:', error);
-        return { ok: false, data: { error: 'Erro de conexão' } };
-        }
-    }    
+        	const data = await response.json();
+        	return { ok: response.ok, data };
+	    } catch (error) {
+        	console.error('Erro na requisição:', error);
+        	return { ok: false, data: { error: 'Erro de conexão' } };
+    	}
+	}
         function initializeApp() {
             // Configurar data atual como padrão para o formulário
             const today = new Date().toISOString().split('T')[0];
