@@ -3,7 +3,7 @@ FROM node:18-alpine
 WORKDIR /app
 
 # 1. Instalar dependências do BACKEND
-COPY backend/package.json backend/package-lock.json ./
+COPY backend/package.json ./
 RUN npm install
 
 # 2. Instalar e buildar FRONTEND
