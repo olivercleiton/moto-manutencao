@@ -2,6 +2,8 @@ const express = require('express');
 const path = require('path');
 const fs = require('fs');
 const app = express();
+
+// USAR A PORTA DO RAILWAY (importante!)
 const PORT = process.env.PORT || 3000;
 
 // Log de inicialização
