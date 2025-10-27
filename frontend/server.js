@@ -5,43 +5,44 @@ const app = express();
 const PORT = process.env.PORT || 3000;
 
 // Log de inicialização
-console.log('🚀 Iniciando servidor frontend...');
+console.log('🚀 Iniciando servidor frontend em modo desenvolvimento...');
 console.log('📁 Diretório atual:', __dirname);
-
-// Verificar se a pasta build existe
-const buildPath = path.join(__dirname, 'build');
-try {
-  if (!fs.existsSync(buildPath)) {
-    console.error('❌ ERRO: Pasta build não encontrada!');
-    console.log('📁 Conteúdo do diretório:', fs.readdirSync(__dirname));
-    process.exit(1);
-  }
-  
-  console.log('✅ Build encontrado:', fs.readdirSync(buildPath));
-} catch (error) {
-  console.error('❌ Erro ao verificar build:', error);
-  process.exit(1);
-}
 
 // Middleware básico
 app.use(express.json());
-app.use(express.static(buildPath));
+
+// Servir arquivos estáticos da pasta public
+app.use(express.static(path.join(__dirname, 'public')));
+
+// Servir também da pasta src se necessário
+app.use('/src', express.static(path.join(__dirname, 'src')));
 
 // Health check simples
 app.get('/health', (req, res) => {
   console.log('✅ Health check recebido');
   res.json({ 
     status: 'OK', 
-    message: 'Frontend funcionando',
+    message: 'Frontend funcionando em modo desenvolvimento',
     timestamp: new Date().toISOString()
   });
+});
+
+// Rota principal - servir o index.html
+app.get('/', (req, res) => {
+  try {
+    console.log('📥 Request recebido para /');
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
+  } catch (error) {
+    console.error('❌ Erro ao servir index.html:', error);
+    res.status(500).send('Erro interno do servidor');
+  }
 });
 
 // Todas as outras rotas vão para o React
 app.get('*', (req, res) => {
   try {
     console.log(`📥 Request recebido: ${req.method} ${req.url}`);
-    res.sendFile(path.join(buildPath, 'index.html'));
+    res.sendFile(path.join(__dirname, 'public', 'index.html'));
   } catch (error) {
     console.error('❌ Erro ao servir index.html:', error);
     res.status(500).send('Erro interno do servidor');
@@ -56,8 +57,9 @@ app.use((error, req, res, next) => {
 
 // Iniciar servidor
 const server = app.listen(PORT, '0.0.0.0', () => {
-  console.log(`🎉 Frontend rodando: http://0.0.0.0:${PORT}`);
+  console.log(`🎉 Frontend rodando: http://localhost:${PORT}`);
   console.log(`⏰ Iniciado em: ${new Date().toISOString()}`);
+  console.log(`📁 Servindo arquivos de: ${__dirname}/public`);
 });
 
 // Graceful shutdown
@@ -68,8 +70,3 @@ process.on('SIGTERM', () => {
     process.exit(0);
   });
 });
-
-// Manter o processo vivo
-setInterval(() => {
-  console.log('💓 Heartbeat:', new Date().toISOString());
-}, 30000); // Log a cada 30 segundos

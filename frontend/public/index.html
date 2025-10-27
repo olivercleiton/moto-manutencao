@@ -1697,14 +1697,17 @@
             localStorage.setItem('highContrast', isHighContrast);
         }
 
-        // Função para alternar entre abas
+               // Função para alternar entre abas
         function switchTab(tabName) {
             const tab = document.querySelector(`#${tabName}-tab`);
             if (tab) {
                 const tabInstance = new bootstrap.Tab(tab);
                 tabInstance.show();
             }
-	if ('serviceWorker' in navigator) {
+        }
+
+        // Registrar Service Worker
+        if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('/sw.js')
                 .then(registration => console.log('SW registered:', registration))
                 .catch(error => console.log('SW registration failed:', error));

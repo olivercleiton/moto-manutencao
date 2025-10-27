@@ -2,7 +2,7 @@
   "name": "motomanutencao-frontend",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx serve -s -l $PORT",
+    "start": "npx serve -s -l 3000"
     "build": "echo 'No build needed for static files'",
     "dev": "npx serve -s -l 3000"
   },
