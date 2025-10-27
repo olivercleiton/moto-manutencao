@@ -1,15 +1,6 @@
 {
-  "name": "moto-manutencao-frontend",
-  "version": "1.0.0",
-  "type": "module",
   "scripts": {
-    "start": "serve -s -l 3000",
-    "build": "echo 'No build needed for static site'"
-  },
-  "dependencies": {
-    "serve": "^14.2.0"
-  },
-  "engines": {
-    "node": ">=18"
+    "build": "react-scripts build",
+    "start": "node server.js"
   }
 }
