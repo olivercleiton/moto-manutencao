@@ -6,12 +6,11 @@ WORKDIR /app
 COPY backend/package.json ./
 RUN npm install
 
-# 2. Instalar e buildar FRONTEND
-COPY frontend/ ./frontend/
-RUN cd frontend && npm install && npm run build
-
-# 3. Copiar código do BACKEND
+# 2. Copiar código do BACKEND
 COPY backend/ ./
+
+# 3. Copiar FRONTEND (arquivos estáticos)
+COPY frontend/ ./frontend/
 
 EXPOSE 3000
 

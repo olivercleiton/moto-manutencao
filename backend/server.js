@@ -49,13 +49,16 @@ app.get('/api', (req, res) => {
   });
 });
 
-// ✅ SERVIR FRONTEND EM PRODUÇÃO (ANTES DA ROTA RAIZ!)
+// ✅ SERVIR FRONTEND ESTÁTICO
 if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  console.log('📁 Servindo frontend estático da pasta:', path.join(__dirname, '../frontend'));
   
-  // Rota catch-all para SPA - DEVE VIR ANTES DA ROTA RAIZ
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  // Servir arquivos estáticos do frontend
+  app.use(express.static(path.join(__dirname, '../frontend')));
+  
+  // Para qualquer rota que não seja /api, servir o frontend
+  app.get(/^\/(?!api).*/, (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
   });
 }
 
