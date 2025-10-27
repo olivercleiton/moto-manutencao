@@ -16,6 +16,12 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// ✅ LOGS DE REQUISIÇÃO (adicionar esta parte)
+app.use((req, res, next) => {
+  console.log(`📨 ${new Date().toISOString()} | ${req.method} ${req.url}`);
+  next();
+});
+
 // Routes
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
@@ -77,8 +83,14 @@ app.use((error, req, res, next) => {
   });
 });
 
-app.listen(PORT, () => {
-  console.log(`🚀 Servidor rodando na porta ${PORT}`);
-  console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'production'}`);
-  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
-});
+try {
+  app.listen(PORT, () => {
+    console.log(`🚀 Servidor rodando na porta ${PORT}`);
+    console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'production'}`);
+    console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
+    console.log(`🌐 URL externa: https://moto-manutencao-production.up.railway.app`);
+  });
+} catch (error) {
+  console.error('❌ ERRO CRÍTICO:', error);
+  process.exit(1);
+}
