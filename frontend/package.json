@@ -1,7 +1,6 @@
 {
   "name": "motomanutencao-frontend",
   "version": "1.0.0",
-  "type": "module",
   "scripts": {
     "build": "react-scripts build",
     "start": "npx serve -s build -l $PORT"
