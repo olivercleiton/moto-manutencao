@@ -2,11 +2,11 @@
   "name": "motomanutencao-frontend",
   "version": "1.0.0",
   "scripts": {
-    "start": "npx serve -s -l 3000",
+    "start": "node server.js",
     "build": "echo 'No build needed for static files'",
-    "dev": "npx serve -s -l 3000"
+    "dev": "node server.js"
   },
   "dependencies": {
-    "serve": "^14.2.5"
+    "express": "^4.18.2"
   }
 }
