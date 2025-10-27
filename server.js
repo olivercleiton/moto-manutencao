@@ -11,10 +11,9 @@ const PORT = process.env.PORT || 3000;
 // Middleware
 app.use(cors({
   origin: [
-    'https://motomanutencao.up.railway.app',
-    'http://localhost:3000',
-    'http://127.0.0.1:3000',                   // Frontend local alternativo
-    'https://moto-manutencao-production.up.railway.app' // Backend URL (se necessário)	
+    'https://motomanutencao.up.railway.app', // Frontend production
+    'http://localhost:3000',                 // Frontend local
+    'http://127.0.0.1:3000'                  // Frontend local alternativo
   ],
   credentials: true
 }));
@@ -35,7 +34,7 @@ app.get('/api/health', (req, res) => {
   });
 });
 
-// ✅ ROTA API RAIZ - ADICIONAR ESTA ROTA
+// ✅ ROTA API RAIZ
 app.get('/api', (req, res) => {
   res.json({
     name: 'MotoManutenção API',
@@ -53,11 +52,37 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Rota raiz do servidor
+// Rota raiz do servidor - Melhorada
 app.get('/', (req, res) => {
-  res.redirect('/api');
+  res.json({
+    message: 'Bem-vindo à MotoManutenção API',
+    documentation: 'Acesse /api para informações completas da API',
+    status: 'Online',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// ✅ MIDDLEWARE DE ROTA NÃO ENCONTRADA (404)
+app.use('*', (req, res) => {
+  res.status(404).json({
+    error: 'Rota não encontrada',
+    path: req.originalUrl,
+    message: 'Verifique a documentação em /api'
+  });
+});
+
+// ✅ ERROR HANDLER GLOBAL
+app.use((error, req, res, next) => {
+  console.error('Erro no servidor:', error);
+  res.status(500).json({
+    error: 'Erro interno do servidor',
+    message: process.env.NODE_ENV === 'development' ? error.message : 'Algo deu errado. Tente novamente mais tarde.',
+    timestamp: new Date().toISOString()
+  });
 });
 
 app.listen(PORT, () => {
   console.log(`🚀 Servidor rodando na porta ${PORT}`);
+  console.log(`📊 Ambiente: ${process.env.NODE_ENV || 'production'}`);
+  console.log(`🔗 Health check: http://localhost:${PORT}/api/health`);
 });
