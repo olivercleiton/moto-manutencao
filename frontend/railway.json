@@ -1,10 +1,9 @@
 {
   "build": {
-    "builder": "NIXPACKS",
-    "buildCommand": "npm install && npm run build",
-    "outputDirectory": "build"
+    "builder": "nixpacks"
   },
   "deploy": {
-    "startCommand": "npm start"
+    "startCommand": "node server.js",
+    "port": 3000
   }
 }
