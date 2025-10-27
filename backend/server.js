@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const path = require('path'); // ✅ ADICIONAR ESTA LINHA
 const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
 const serviceRoutes = require('./routes/services');
@@ -10,11 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: [
-    'https://motomanutencao.up.railway.app', // Frontend production
-    'http://localhost:3000',                 // Frontend local
-    'http://127.0.0.1:3000'                  // Frontend local alternativo
-  ],
+  origin: true,  // ✅ MUDADO PARA TRUE
   credentials: true
 }));
 app.use(express.json());
@@ -61,6 +58,15 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
+
+// ✅ SERVIR FRONTEND EM PRODUÇÃO (ANTES DAS ROTAS DE ERRO)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  });
+}
 
 // ✅ MIDDLEWARE DE ROTA NÃO ENCONTRADA (404)
 app.use('*', (req, res) => {
