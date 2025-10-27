@@ -1,78 +1,75 @@
-const http = require('http');
-const fs = require('fs');
+const express = require('express');
 const path = require('path');
+const fs = require('fs');
+const app = express();
 const PORT = process.env.PORT || 3000;
 
-console.log('🚀 Iniciando servidor HTTP nativo...');
+// Log de inicialização
+console.log('🚀 Iniciando servidor frontend...');
+console.log('📁 Diretório atual:', __dirname);
 
+// Verificar se a pasta build existe
 const buildPath = path.join(__dirname, 'build');
+try {
+  if (!fs.existsSync(buildPath)) {
+    console.error('❌ ERRO: Pasta build não encontrada!');
+    console.log('📁 Conteúdo do diretório:', fs.readdirSync(__dirname));
+    process.exit(1);
+  }
+  
+  console.log('✅ Build encontrado:', fs.readdirSync(buildPath));
+} catch (error) {
+  console.error('❌ Erro ao verificar build:', error);
+  process.exit(1);
+}
 
-const mimeTypes = {
-  '.html': 'text/html',
-  '.js': 'application/javascript',
-  '.css': 'text/css',
-  '.png': 'image/png',
-  '.jpg': 'image/jpeg',
-  '.gif': 'image/gif',
-  '.svg': 'image/svg+xml',
-  '.json': 'application/json',
-  '.txt': 'text/plain'
-};
+// Middleware básico
+app.use(express.json());
+app.use(express.static(buildPath));
 
-const server = http.createServer((req, res) => {
+// Health check simples
+app.get('/health', (req, res) => {
+  console.log('✅ Health check recebido');
+  res.json({ 
+    status: 'OK', 
+    message: 'Frontend funcionando',
+    timestamp: new Date().toISOString()
+  });
+});
+
+// Todas as outras rotas vão para o React
+app.get('*', (req, res) => {
   try {
-    let filePath = req.url;
-    
-    // Health check
-    if (filePath === '/health') {
-      res.writeHead(200, { 'Content-Type': 'application/json' });
-      return res.end(JSON.stringify({ status: 'OK', server: 'http-native' }));
-    }
-    
-    // Rota raiz vai para index.html
-    if (filePath === '/' || filePath === '/index.html') {
-      filePath = '/index.html';
-    }
-    
-    const fullPath = path.join(buildPath, filePath);
-    const ext = path.extname(fullPath);
-    const contentType = mimeTypes[ext] || 'application/octet-stream';
-    
-    // Ler e servir arquivo
-    fs.readFile(fullPath, (err, data) => {
-      if (err) {
-        // Se arquivo não encontrado, servir index.html (SPA)
-        if (err.code === 'ENOENT') {
-          fs.readFile(path.join(buildPath, 'index.html'), (err, data) => {
-            if (err) {
-              res.writeHead(404);
-              res.end('File not found');
-            } else {
-              res.writeHead(200, { 'Content-Type': 'text/html' });
-              res.end(data);
-            }
-          });
-        } else {
-          res.writeHead(500);
-          res.end('Server error');
-        }
-      } else {
-        res.writeHead(200, { 'Content-Type': contentType });
-        res.end(data);
-      }
-    });
+    console.log(`📥 Request recebido: ${req.method} ${req.url}`);
+    res.sendFile(path.join(buildPath, 'index.html'));
   } catch (error) {
-    console.error('❌ Erro no servidor:', error);
-    res.writeHead(500);
-    res.end('Internal server error');
+    console.error('❌ Erro ao servir index.html:', error);
+    res.status(500).send('Erro interno do servidor');
   }
 });
 
-server.listen(PORT, '0.0.0.0', () => {
-  console.log(`✅ Servidor HTTP rodando na porta ${PORT}`);
+// Tratamento de erros global
+app.use((error, req, res, next) => {
+  console.error('❌ Erro não tratado:', error);
+  res.status(500).json({ error: 'Erro interno do servidor' });
 });
 
-// Manter processo vivo
+// Iniciar servidor
+const server = app.listen(PORT, '0.0.0.0', () => {
+  console.log(`🎉 Frontend rodando: http://0.0.0.0:${PORT}`);
+  console.log(`⏰ Iniciado em: ${new Date().toISOString()}`);
+});
+
+// Graceful shutdown
+process.on('SIGTERM', () => {
+  console.log('🔄 Recebido SIGTERM, encerrando servidor...');
+  server.close(() => {
+    console.log('✅ Servidor encerrado');
+    process.exit(0);
+  });
+});
+
+// Manter o processo vivo
 setInterval(() => {
-  console.log('💓 Servidor ativo:', new Date().toISOString());
-}, 60000);
+  console.log('💓 Heartbeat:', new Date().toISOString());
+}, 30000); // Log a cada 30 segundos
