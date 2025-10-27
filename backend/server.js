@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const path = require('path'); // ✅ ADICIONAR ESTA LINHA
+const path = require('path');
 const authRoutes = require('./routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
 const serviceRoutes = require('./routes/services');
@@ -11,7 +11,7 @@ const PORT = process.env.PORT || 3000;
 
 // Middleware
 app.use(cors({
-  origin: true,  // ✅ MUDADO PARA TRUE
+  origin: true,
   credentials: true
 }));
 app.use(express.json());
@@ -49,7 +49,17 @@ app.get('/api', (req, res) => {
   });
 });
 
-// Rota raiz do servidor - Melhorada
+// ✅ SERVIR FRONTEND EM PRODUÇÃO (ANTES DA ROTA RAIZ!)
+if (process.env.NODE_ENV === 'production') {
+  app.use(express.static(path.join(__dirname, '../frontend/build')));
+  
+  // Rota catch-all para SPA - DEVE VIR ANTES DA ROTA RAIZ
+  app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
+  });
+}
+
+// Rota raiz do servidor - AGORA VEM DEPOIS DO FRONTEND
 app.get('/', (req, res) => {
   res.json({
     message: 'Bem-vindo à MotoManutenção API',
@@ -58,15 +68,6 @@ app.get('/', (req, res) => {
     timestamp: new Date().toISOString()
   });
 });
-
-// ✅ SERVIR FRONTEND EM PRODUÇÃO (ANTES DAS ROTAS DE ERRO)
-if (process.env.NODE_ENV === 'production') {
-  app.use(express.static(path.join(__dirname, '../frontend/build')));
-  
-  app.get('*', (req, res) => {
-    res.sendFile(path.join(__dirname, '../frontend/build/index.html'));
-  });
-}
 
 // ✅ MIDDLEWARE DE ROTA NÃO ENCONTRADA (404)
 app.use('*', (req, res) => {
