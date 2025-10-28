@@ -7,11 +7,15 @@ const serviceRoutes = require('./routes/services');
 const userRoutes = require('./routes/users');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
-// Middleware
+// Middleware CORS - Específico para desenvolvimento
 app.use(cors({
-  origin: true,
+  origin: [
+    'http://localhost:3000',      // Frontend local
+    'http://127.0.0.1:3000',     // Frontend local alternativo
+    'https://moto-manutencao-production.up.railway.app' // Produção
+  ],
   credentials: true
 }));
 app.use(express.json());
