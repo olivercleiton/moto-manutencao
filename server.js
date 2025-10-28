@@ -4,7 +4,7 @@ const cors = require('cors');
 const path = require('path');
 
 // Rotas da API
-const authRoutes = require('./routes/auth');
+const authRoutes = require('./backend/routes/auth');
 const vehicleRoutes = require('./routes/vehicles');
 const serviceRoutes = require('./routes/services');
 const userRoutes = require('./routes/users');
