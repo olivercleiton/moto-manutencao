@@ -1,4 +1,4 @@
-const CACHE_NAME = 'moto-manutencao-v2-' + new Date().getTime();
+const CACHE_NAME = 'moto-manutencao-v2-' + new Date().getTime(); 
 const urlsToCache = [
   '/',
   '/styles.css', 
@@ -12,7 +12,13 @@ self.addEventListener('install', event => {
   );
 });
 
+// Intercepta fetch
 self.addEventListener('fetch', event => {
+  // Se for requisição para API, deixa passar sem usar cache
+  if (event.request.url.includes('/api/')) {
+    return; // não faz cache de chamadas à API
+  }
+
   event.respondWith(
     caches.match(event.request)
       .then(response => response || fetch(event.request))

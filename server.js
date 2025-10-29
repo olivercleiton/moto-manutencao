@@ -4,10 +4,10 @@ const cors = require('cors');
 const path = require('path');
 
 // Rotas da API
-const authRoutes = require('./routes/auth');
-const vehicleRoutes = require('./routes/vehicles');
-const serviceRoutes = require('./routes/services');
-const userRoutes = require('./routes/users');
+const authRoutes = require('./backend/routes/auth');
+const vehicleRoutes = require('./backend/routes/vehicles');
+const serviceRoutes = require('./backend/routes/services');
+const userRoutes = require('./backend/routes/users');
 
 const app = express();
 const PORT = process.env.PORT || 3000;

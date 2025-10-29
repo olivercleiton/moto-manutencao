@@ -772,108 +772,54 @@
         </div>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-	
-	// Configuração dinâmica da URL da API
-	const API_BASE_URL = window.location.hostname === 'localhost' 
-    		? 'http://localhost:3001' 
-    		: 'https://moto-manutencao-production.up.railway.app';	
+   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script> 
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    // ========== SISTEMA DE LOGIN ==========
 
+    let authToken = localStorage.getItem('token');
 
-        // ========== SISTEMA DE LOGIN ==========
-        document.addEventListener('DOMContentLoaded', function() {
-            // Verificar se já está logado
-            checkLoginStatus();
-            
-            // Configurar eventos do login
-            setupLoginEvents();
-        });
+    document.addEventListener('DOMContentLoaded', function() {
+        checkLoginStatus();
+        setupLoginEvents();
+    });
 
-        function checkLoginStatus() {
-        authToken = localStorage.getItem('token');
+    function checkLoginStatus() {
         const user = JSON.parse(localStorage.getItem('user') || '{}');
-    
-         if (authToken && user.name) {
-        showAppScreen(user.name);
+        if (authToken && user.name) {
+            showAppScreen(user.name);
         } else {
-        showLoginScreen();
+            showLoginScreen();
         }
-        }
+    }
 
-        function setupLoginEvents() {
-        // Alternar visibilidade da senha
+    function setupLoginEvents() {
         const togglePassword = document.getElementById('togglePassword');
         const passwordInput = document.getElementById('password');
-    
-     if (togglePassword && passwordInput) {
-        togglePassword.addEventListener('click', function() {
-            const type = passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-            passwordInput.setAttribute('type', type);
-            
-            // Alterar o ícone
-            this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
-        });
+        if (togglePassword && passwordInput) {
+            togglePassword.addEventListener('click', function() {
+                const type = passwordInput.type === 'password' ? 'text' : 'password';
+                passwordInput.type = type;
+                this.innerHTML = type === 'password' ? '<i class="fas fa-eye"></i>' : '<i class="fas fa-eye-slash"></i>';
+            });
         }
-    
-        // Processar login
+
         const loginForm = document.getElementById('loginForm');
         if (loginForm) {
-        loginForm.addEventListener('submit', async function(e) {
-            e.preventDefault();
-            
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-            
-            if (!email || !password) {
-                alert('Por favor, preencha todos os campos.');
-                return;
-            }
-            
-            try {
-                const result = await apiRequest('/auth/login', {
-                    method: 'POST',
-                    body: JSON.stringify({ email, password })
-                });
-                
-                if (result && result.ok) {
-                    authToken = result.data.token;
-                    localStorage.setItem('token', authToken);
-                    localStorage.setItem('user', JSON.stringify(result.data.user));
-                    showAppScreen(result.data.user.name);
-                    
-                    // Limpar o formulário
-                    document.getElementById('loginForm').reset();
-                } else {
-                    alert(result?.data?.error || 'Erro no login');
-                }
-            } catch (error) {
-                alert('Erro de conexão com o servidor');
-            }
-        });
-        }
-    
-         // Cadastro
-         const registerLink = document.getElementById('registerLink');
-        if (registerLink) {
-        registerLink.addEventListener('click', async function(e) {
-            e.preventDefault();
-            
-            const name = prompt('Digite seu nome:');
-            const email = prompt('Digite seu e-mail:');
-            const password = prompt('Crie uma senha (mínimo 6 caracteres):');
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                const email = document.getElementById('email').value;
+                const password = document.getElementById('password').value;
 
-            if (name && email && password) {
-                if (password.length < 6) {
-                    alert('Senha deve ter pelo menos 6 caracteres.');
+                if (!email || !password) {
+                    alert('Por favor, preencha todos os campos.');
                     return;
                 }
 
                 try {
-                    const result = await apiRequest('/auth/register', {
+                    const result = await apiRequest('/auth/login', {
                         method: 'POST',
-                        body: JSON.stringify({ name, email, password })
+                        body: JSON.stringify({ email, password })
                     });
 
                     if (result && result.ok) {
@@ -881,52 +827,122 @@
                         localStorage.setItem('token', authToken);
                         localStorage.setItem('user', JSON.stringify(result.data.user));
                         showAppScreen(result.data.user.name);
-                        alert('Cadastro realizado com sucesso!');
+                        loginForm.reset();
                     } else {
-                        alert(result?.data?.error || 'Erro no cadastro');
+                        alert(result?.data?.error || 'Erro no login');
                     }
                 } catch (error) {
                     alert('Erro de conexão com o servidor');
                 }
+            });
+        }
+
+        const registerLink = document.getElementById('registerLink');
+        if (registerLink) {
+            registerLink.addEventListener('click', async function(e) {
+                e.preventDefault();
+                const name = prompt('Digite seu nome:');
+                const email = prompt('Digite seu e-mail:');
+                const password = prompt('Crie uma senha (mínimo 6 caracteres):');
+
+                if (name && email && password) {
+                    if (password.length < 6) {
+                        alert('Senha deve ter pelo menos 6 caracteres.');
+                        return;
+                    }
+
+                    try {
+                        const result = await apiRequest('/auth/register', {
+                            method: 'POST',
+                            body: JSON.stringify({ name, email, password })
+                        });
+
+                        if (result && result.ok) {
+                            authToken = result.data.token;
+                            localStorage.setItem('token', authToken);
+                            localStorage.setItem('user', JSON.stringify(result.data.user));
+                            showAppScreen(result.data.user.name);
+                            alert('Cadastro realizado com sucesso!');
+                        } else {
+                            alert(result?.data?.error || 'Erro no cadastro');
+                        }
+                    } catch (error) {
+                        alert('Erro de conexão com o servidor');
+                    }
                 }
             });
-        }   
-    
-        // Recuperação de senha
+        }
+
         const forgotPassword = document.getElementById('forgotPassword');
         if (forgotPassword) {
             forgotPassword.addEventListener('click', function(e) {
-            e.preventDefault();
-            alert('Funcionalidade de recuperação de senha seria implementada aqui.');
+                e.preventDefault();
+                alert('Funcionalidade de recuperação de senha seria implementada aqui.');
             });
         }
     }
 
-        function showLoginScreen() {
-            document.getElementById('loginScreen').style.display = 'flex';
-            document.getElementById('appScreen').style.display = 'none';
-            document.body.classList.remove('app-loaded');
+    function showLoginScreen() {
+        document.getElementById('loginScreen').style.display = 'flex';
+        document.getElementById('appScreen').style.display = 'none';
+        document.body.classList.remove('app-loaded');
+    }
+
+    function showAppScreen(userName) {
+        document.getElementById('loginScreen').style.display = 'none';
+        document.getElementById('appScreen').style.display = 'block';
+        document.body.classList.add('app-loaded');
+        document.getElementById('userName').textContent = userName;
+        initializeApp();
+    }
+
+    function logout() {
+        localStorage.removeItem('token');
+        localStorage.removeItem('user');
+        authToken = null;
+        showLoginScreen();
+    }
+
+    // ========== FUNÇÃO DE REQUISIÇÃO PARA O BACKEND ==========
+    async function apiRequest(endpoint, options = {}) {
+        const config = {
+            method: options.method || 'GET',
+            headers: {
+                'Content-Type': 'application/json',
+                ...options.headers
+            },
+            body: options.body
+        };
+
+        if (authToken) {
+            config.headers.Authorization = `Bearer ${authToken}`;
         }
 
-        function showAppScreen(userName) {
-            document.getElementById('loginScreen').style.display = 'none';
-            document.getElementById('appScreen').style.display = 'block';
-            document.body.classList.add('app-loaded');
-            
-            // Atualizar nome do usuário
-            document.getElementById('userName').textContent = userName;
-            
-            // Inicializar o aplicativo
-            initializeApp();
-        }
+        try {
+            // **URL relativa** evita problemas de CORS local
+            const response = await fetch(`/api${endpoint}`, config);
 
-        function logout() {
-            localStorage.removeItem('token');
-            localStorage.removeItem('user');
-            authToken = null;
-            showLoginScreen();
-        }
+            if (response.status === 401) {
+                logout();
+                return null;
+            }
 
+            const data = await response.json();
+            return { ok: response.ok, data };
+        } catch (error) {
+            console.error('Erro na requisição:', error);
+            return { ok: false, data: { error: 'Erro de conexão' } };
+        }
+    }
+
+    // ========== REGISTRAR SERVICE WORKER ==========
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js')
+            .then(reg => console.log('SW registered:', reg))
+            .catch(err => console.log('SW registration failed:', err));
+    }
+    
+    
         // ========== APLICATIVO PRINCIPAL ==========
         // Dados iniciais do aplicativo
         let vehicles = [];
@@ -955,40 +971,11 @@
             'rgba(50, 150, 150, 0.7)'    // Ciano
         ];
         // ========== CONFIGURAÇÃO DA API ==========
-        let authToken = localStorage.getItem('token');
-
-        // Função para fazer requisições autenticadas
-        // Função para fazer requisições autenticadas
-	async function apiRequest(endpoint, options = {}) {
-    	const config = {
-        method: options.method || 'GET',
-        headers: {
-            'Content-Type': 'application/json',
-            ...options.headers
-        },
-        body: options.body
-    	};
-
-	    if (authToken) {
-        config.headers.Authorization = `Bearer ${authToken}`;
-    	}
-
-	    try {
-        const response = await fetch(`${API_BASE_URL}/api${endpoint}`, config);
         
-        if (response.status === 401) {
-            // Token inválido, fazer logout
-            logout();
-            return null;
-        }
 
-        	const data = await response.json();
-        	return { ok: response.ok, data };
-	    } catch (error) {
-        	console.error('Erro na requisição:', error);
-        	return { ok: false, data: { error: 'Erro de conexão' } };
-    	}
-	}
+        
+        // Função para fazer requisições autenticadas
+	
         function initializeApp() {
             // Configurar data atual como padrão para o formulário
             const today = new Date().toISOString().split('T')[0];
@@ -1708,13 +1695,7 @@
                 tabInstance.show();
             }
         }
-
-        // Registrar Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('/sw.js')
-                .then(registration => console.log('SW registered:', registration))
-                .catch(error => console.log('SW registration failed:', error));
-        }
+  
     </script>
 </body>
 </html>
