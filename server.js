@@ -2,44 +2,44 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+
+// === INICIALIZAÇÃO DO APP ===
+const app = express();
+const PORT = process.env.PORT || 3000;
+
+// === ROTAS DA API ===
 const testRoutes = require('./backend/routes/test');
-app.use('/api/test', testRoutes);
-
-
-// Rotas da API
 const authRoutes = require('./backend/routes/auth');
 const vehicleRoutes = require('./backend/routes/vehicles');
 const serviceRoutes = require('./backend/routes/services');
 const userRoutes = require('./backend/routes/users');
-
-const app = express();
-const PORT = process.env.PORT || 3000;
 
 // === CONFIGURAÇÕES ===
 app.use(cors({
   origin: [
     'http://localhost:3000',
     'http://127.0.0.1:3000',
-    'https://moto-manutencao.onrender.com' // ajuste pro domínio final no Render
+    'https://moto-manutencao.onrender.com' // domínio final no Render
   ],
   credentials: true
 }));
 
 app.use(express.json());
 
-// Logs de requisição
+// === LOG DE REQUISIÇÕES ===
 app.use((req, res, next) => {
   console.log(`📨 ${new Date().toISOString()} | ${req.method} ${req.url}`);
   next();
 });
 
 // === ROTAS API ===
+app.use('/api/test', testRoutes);
 app.use('/api/auth', authRoutes);
 app.use('/api/vehicles', vehicleRoutes);
 app.use('/api/services', serviceRoutes);
 app.use('/api/users', userRoutes);
 
-// Health check
+// === HEALTH CHECK ===
 app.get('/api/health', (req, res) => {
   res.json({
     status: 'OK',
@@ -49,10 +49,8 @@ app.get('/api/health', (req, res) => {
 });
 
 // === SERVIR FRONTEND ESTÁTICO ===
-// (coloque seus arquivos HTML, CSS e JS na pasta /public)
 app.use(express.static(path.join(__dirname, 'public')));
 
-// Para qualquer rota não-API, devolve o index.html
 app.get('*', (req, res) => {
   try {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
@@ -67,7 +65,9 @@ app.use((err, req, res, next) => {
   console.error('❌ Erro no servidor:', err);
   res.status(500).json({
     error: 'Erro interno do servidor',
-    message: process.env.NODE_ENV === 'development' ? err.message : 'Algo deu errado. Tente novamente mais tarde.',
+    message: process.env.NODE_ENV === 'development'
+      ? err.message
+      : 'Algo deu errado. Tente novamente mais tarde.',
     timestamp: new Date().toISOString()
   });
 });
