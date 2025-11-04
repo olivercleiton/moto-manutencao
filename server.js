@@ -2,6 +2,9 @@
 const express = require('express');
 const cors = require('cors');
 const path = require('path');
+const testRoutes = require('./backend/routes/test');
+app.use('/api/test', testRoutes);
+
 
 // Rotas da API
 const authRoutes = require('./backend/routes/auth');
