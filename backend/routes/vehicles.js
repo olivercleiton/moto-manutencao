@@ -1,77 +1,79 @@
 const express = require('express');
-const auth = require('../middleware/auth');
-const { getVehicles, saveVehicles } = require('../data/database');
-
 const router = express.Router();
+const pool = require('../config/db');
 
-// Todos os endpoints exigem autenticação
-router.use(auth);
-
-// Listar veículos do usuário
-router.get('/', (req, res) => {
-  const vehicles = getVehicles();
-  const userVehicles = vehicles.filter(v => v.userId === req.user.userId);
-  res.json(userVehicles);
-});
-
-// Adicionar veículo
-router.post('/', (req, res) => {
-  const { name, model, year, plate, mileage } = req.body;
-  const vehicles = getVehicles();
-
-  const newVehicle = {
-    id: Date.now().toString(),
-    userId: req.user.userId,
-    name,
-    model,
-    year: parseInt(year),
-    plate,
-    mileage: parseInt(mileage),
-    createdAt: new Date().toISOString()
-  };
-
-  vehicles.push(newVehicle);
-  saveVehicles(vehicles);
-
-  res.status(201).json(newVehicle);
-});
-
-// Atualizar veículo
-router.put('/:id', (req, res) => {
-  const { id } = req.params;
-  const { model, year, plate, mileage } = req.body;
-  const vehicles = getVehicles();
-
-  const vehicleIndex = vehicles.findIndex(v => v.id === id && v.userId === req.user.userId);
-  if (vehicleIndex === -1) {
-    return res.status(404).json({ error: 'Veículo não encontrado' });
+// === LISTAR TODOS OS VEÍCULOS (com nome do dono) ===
+router.get('/', async (req, res) => {
+  try {
+    const result = await pool.query(`
+      SELECT v.*, u.name AS owner_name, u.email AS owner_email
+      FROM vehicles v
+      JOIN users u ON v.owner_id = u.id
+      ORDER BY v.id DESC
+    `);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao buscar veículos:', error);
+    res.status(500).json({ error: 'Erro ao buscar veículos' });
   }
-
-  vehicles[vehicleIndex] = {
-    ...vehicles[vehicleIndex],
-    model,
-    year: parseInt(year),
-    plate,
-    mileage: parseInt(mileage)
-  };
-
-  saveVehicles(vehicles);
-  res.json(vehicles[vehicleIndex]);
 });
 
-// Excluir veículo
-router.delete('/:id', (req, res) => {
-  const { id } = req.params;
-  const vehicles = getVehicles();
-
-  const vehicleIndex = vehicles.findIndex(v => v.id === id && v.userId === req.user.userId);
-  if (vehicleIndex === -1) {
-    return res.status(404).json({ error: 'Veículo não encontrado' });
+// === LISTAR VEÍCULOS DE UM USUÁRIO ===
+router.get('/user/:userId', async (req, res) => {
+  const { userId } = req.params;
+  try {
+    const result = await pool.query('SELECT * FROM vehicles WHERE owner_id = $1 ORDER BY id DESC', [userId]);
+    res.json(result.rows);
+  } catch (error) {
+    console.error('Erro ao buscar veículos do usuário:', error);
+    res.status(500).json({ error: 'Erro ao buscar veículos do usuário' });
   }
+});
 
-  vehicles.splice(vehicleIndex, 1);
-  saveVehicles(vehicles);
-  res.json({ message: 'Veículo excluído com sucesso' });
+// === CADASTRAR NOVO VEÍCULO ===
+router.post('/', async (req, res) => {
+  const { owner_id, brand, model, plate, year } = req.body;
+  try {
+    const result = await pool.query(
+      `INSERT INTO vehicles (owner_id, brand, model, plate, year)
+       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
+      [owner_id, brand, model, plate, year]
+    );
+    res.status(201).json(result.rows[0]);
+  } catch (error) {
+    console.error('Erro ao cadastrar veículo:', error);
+    res.status(500).json({ error: 'Erro ao cadastrar veículo' });
+  }
+});
+
+// === ATUALIZAR VEÍCULO ===
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const { brand, model, plate, year } = req.body;
+  try {
+    const result = await pool.query(
+      `UPDATE vehicles
+       SET brand = $1, model = $2, plate = $3, year = $4
+       WHERE id = $5 RETURNING *`,
+      [brand, model, plate, year, id]
+    );
+    res.json(result.rows[0]);
+  } catch (error) {
+    console.error('Erro ao atualizar veículo:', error);
+    res.status(500).json({ error: 'Erro ao atualizar veículo' });
+  }
+});
+
+// === DELETAR VEÍCULO ===
+router.delete('/:id', async (req, res) => {
+  const { id } = req.params;
+  try {
+    await pool.query('DELETE FROM vehicles WHERE id = $1', [id]);
+    res.json({ message: 'Veículo removido com sucesso!' });
+  } catch (error) {
+    console.error('Erro ao remover veículo:', error);
+    res.status(500).json({ error: 'Erro ao remover veículo' });
+  }
 });
 
 module.exports = router;
