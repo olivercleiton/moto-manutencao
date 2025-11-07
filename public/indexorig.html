@@ -973,33 +973,17 @@
         // ========== CONFIGURAÇÃO DA API ==========
         
 
-	// 🔄 Função para carregar veículos do banco via API
-	async function loadVehiclesFromAPI() {
-  	const result = await apiRequest('/vehicles');
-  	if (result && result.ok) {
-    	vehicles = result.data;
-    	renderVehiclesList();
-    	renderVehicleManagementList();
-  	} else {
-    	console.error(result?.data?.error || 'Erro ao carregar veículos');
-  	}
-	}
         
-           // Função para fazer requisições autenticadas
-
-	async function initializeApp() {
-  	  // Configurar data atual como padrão para o formulário
-  	  const today = new Date().toISOString().split('T')[0];
-  	  document.getElementById('serviceDate').value = today;
-   	 document.getElementById('mobileServiceDate').value = today;
-
-   	 // 🔄 Agora os veículos vêm do banco, não do localStorage
-   	 await loadVehiclesFromAPI();
-
-   	 // Inicializar event listeners
-   	 setupEventListeners();
-	}
-
+        // Função para fazer requisições autenticadas
+	
+        function initializeApp() {
+            // Configurar data atual como padrão para o formulário
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('serviceDate').value = today;
+            document.getElementById('mobileServiceDate').value = today;
+            
+            // Carregar dados salvos
+            loadSavedData();
             
             // Inicializar event listeners
             setupEventListeners();
@@ -1231,35 +1215,44 @@
         }
 
         // Adicionar novo veículo
-        async function addNewVehicle() {
- 	   const name = document.getElementById('vehicleName').value.trim();
- 	   const model = document.getElementById('vehicleModel').value.trim();
-	   const year = document.getElementById('vehicleYear').value;
- 	   const plate = document.getElementById('vehiclePlate').value.trim();
- 	   const mileage = document.getElementById('vehicleMileage').value;
-
-  	   if (!name || !model || !year || !mileage) {
-   	    alert('Por favor, preencha todos os campos obrigatórios.');
-  	    return;
- 	   }
-
-       	  const result = await apiRequest('/vehicles', {
-  	    method: 'POST',
-  	    body: JSON.stringify({ name, model, year, plate, mileage }),
- 	  });
-
- 	 if (result && result.ok) {
-	    alert('Veículo adicionado com sucesso!');
- 	    await loadVehiclesFromAPI();
-	  } else {
- 	    alert(result.data?.error || 'Erro ao adicionar veículo');
-	  }
-
- 	 const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
-	 modal.hide();
-	 document.getElementById('vehicleForm').reset();
-	}
-
+        function addNewVehicle() {
+            const name = document.getElementById('vehicleName').value.trim();
+            const model = document.getElementById('vehicleModel').value.trim();
+            const year = document.getElementById('vehicleYear').value;
+            const plate = document.getElementById('vehiclePlate').value.trim();
+            const mileage = document.getElementById('vehicleMileage').value;
+            
+            if (!name || !model || !year || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            const newVehicle = {
+                id: Date.now().toString(),
+                name: name,
+                model: model,
+                year: parseInt(year),
+                plate: plate,
+                mileage: parseInt(mileage)
+            };
+            
+            vehicles.push(newVehicle);
+            saveVehiclesToStorage();
+            renderVehiclesList();
+            renderVehicleManagementList();
+            
+            // Selecionar o novo veículo
+            selectVehicle(newVehicle.id);
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addVehicleModal'));
+            modal.hide();
+            
+            // Limpar o formulário
+            document.getElementById('vehicleForm').reset();
+            
+            alert('Veículo adicionado com sucesso!');
+        }
 
         // Renderizar lista de veículos
         function renderVehiclesList() {
@@ -1368,93 +1361,47 @@
         }
 
         // Adicionar serviço a partir do formulário principal
-	async function addServiceFromForm() {
-  	  const type = document.getElementById('serviceType').value;
- 	  const date = document.getElementById('serviceDate').value;
-  	  const mileage = document.getElementById('serviceMileage').value;
-  	  const cost = document.getElementById('serviceCost').value;
-	  const notes = document.getElementById('serviceNotes').value;
+        function addServiceFromForm() {
+            const type = document.getElementById('serviceType').value;
+            const date = document.getElementById('serviceDate').value;
+            const mileage = document.getElementById('serviceMileage').value;
+            const cost = document.getElementById('serviceCost').value;
+            const notes = document.getElementById('serviceNotes').value;
+            
+            if (!type || !date || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            addService(type, date, mileage, cost, notes);
+            
+            // Limpar o formulário
+            document.getElementById('serviceForm').reset();
+            document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
+        }
 
-	  if (!type || !date || !mileage) {
-    	   alert('Por favor, preencha todos os campos obrigatórios.');
-    	   return;
-  	  }
-
-	  // 🔄 Envia para o backend (Render)
-  	   const result = await apiRequest('/services', {
- 	    method: 'POST',
-	    body: JSON.stringify({
-      		vehicle_id: currentVehicleId,
-      		description: type,
-      		date,
-      		cost: cost ? parseFloat(cost) : 0,
-      		mileage: parseInt(mileage),
-      		notes
-    	 }),
-  	});
-
-	  if (result && result.ok) {
-    	   alert('Serviço registrado com sucesso!');
-    	   await loadServicesFromAPI(currentVehicleId);
-  	} else {
-    	  alert(result?.data?.error || 'Erro ao salvar serviço');
-  	}
-
-	 // Limpar o formulário
-  	document.getElementById('serviceForm').reset();
-  	document.getElementById('serviceDate').value = new Date().toISOString().split('T')[0];
-	}
-
-	// Adicionar serviço a partir do modal mobile
-	async function addServiceFromMobile() {
-  	  const type = document.getElementById('mobileServiceType').value;
-  	  const date = document.getElementById('mobileServiceDate').value;
-  	  const mileage = document.getElementById('mobileServiceMileage').value;
-  	  const cost = document.getElementById('mobileServiceCost').value;
-
-	  if (!type || !date || !mileage) {
-    	   alert('Por favor, preencha todos os campos obrigatórios.');
-    	   return;
-  	}
-
-    const result = await apiRequest('/services', {
-  	method: 'POST',
-    	body: JSON.stringify({
-         vehicle_id: currentVehicleId,
-         description: type,
-         date,
-         cost: cost ? parseFloat(cost) : 0,
-         mileage: parseInt(mileage),
-         notes: ''
-      }),
-    });
-
-	  if (result && result.ok) {
-    		alert('Serviço registrado com sucesso!');
-    		await loadServicesFromAPI(currentVehicleId);
-  		} else {
-    		alert(result?.data?.error || 'Erro ao salvar serviço');
-  	}
-
-	  // Fechar o modal e limpar
-	  const modal = bootstrap.Modal.getInstance(document.getElementById('addServiceModal'));
-  	  modal.hide();
-
-	  document.getElementById('mobileServiceForm').reset();
-  	  document.getElementById('mobileServiceDate').value = new Date().toISOString().split('T')[0];
-	}
-	
-	// Função auxiliar para carregar serviços do banco
-	async function loadServicesFromAPI(vehicleId) {
-	  const result = await apiRequest(`/services/${vehicleId}`);
-	  if (result && result.ok) {
-	    services = result.data;
-	    updateServicesList();
-  	  } else {
-    	   console.error(result?.data?.error || 'Erro ao carregar serviços');
-  	 }
-	}
-
+        // Adicionar serviço a partir do modal mobile
+        function addServiceFromMobile() {
+            const type = document.getElementById('mobileServiceType').value;
+            const date = document.getElementById('mobileServiceDate').value;
+            const mileage = document.getElementById('mobileServiceMileage').value;
+            const cost = document.getElementById('mobileServiceCost').value;
+            
+            if (!type || !date || !mileage) {
+                alert('Por favor, preencha todos os campos obrigatórios.');
+                return;
+            }
+            
+            addService(type, date, mileage, cost, "");
+            
+            // Fechar o modal
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addServiceModal'));
+            modal.hide();
+            
+            // Limpar o formulário
+            document.getElementById('mobileServiceForm').reset();
+            document.getElementById('mobileServiceDate').value = new Date().toISOString().split('T')[0];
+        }
 
         // Função principal para adicionar serviço
         function addService(type, date, mileage, cost, notes) {

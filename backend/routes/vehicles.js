@@ -1,78 +1,52 @@
 const express = require('express');
 const router = express.Router();
 const pool = require('../config/db');
+const authMiddleware = require('../middleware/auth');
 
-// === LISTAR TODOS OS VEÍCULOS (com nome do dono) ===
+// 🔒 Todas as rotas exigem token válido
+router.use(authMiddleware);
+
+// 📥 Listar veículos do usuário logado
 router.get('/', async (req, res) => {
   try {
-    const result = await pool.query(`
-      SELECT v.*, u.name AS owner_name, u.email AS owner_email
-      FROM vehicles v
-      JOIN users u ON v.owner_id = u.id
-      ORDER BY v.id DESC
-    `);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Erro ao buscar veículos:', error);
-    res.status(500).json({ error: 'Erro ao buscar veículos' });
+    const { rows } = await pool.query(
+      'SELECT * FROM vehicles WHERE owner_id = $1 ORDER BY id DESC',
+      [req.user.id]
+    );
+    res.json(rows);
+  } catch (err) {
+    console.error('Erro ao listar veículos:', err);
+    res.status(500).json({ error: 'Erro ao listar veículos' });
   }
 });
 
-// === LISTAR VEÍCULOS DE UM USUÁRIO ===
-router.get('/user/:userId', async (req, res) => {
-  const { userId } = req.params;
-  try {
-    const result = await pool.query('SELECT * FROM vehicles WHERE owner_id = $1 ORDER BY id DESC', [userId]);
-    res.json(result.rows);
-  } catch (error) {
-    console.error('Erro ao buscar veículos do usuário:', error);
-    res.status(500).json({ error: 'Erro ao buscar veículos do usuário' });
-  }
-});
-
-// === CADASTRAR NOVO VEÍCULO ===
+// ➕ Criar novo veículo
 router.post('/', async (req, res) => {
-  const { owner_id, brand, model, plate, year } = req.body;
+  const { name, model, year, plate, mileage } = req.body;
   try {
-    const result = await pool.query(
-      `INSERT INTO vehicles (owner_id, brand, model, plate, year)
-       VALUES ($1, $2, $3, $4, $5) RETURNING *`,
-      [owner_id, brand, model, plate, year]
+    const { rows } = await pool.query(
+      `INSERT INTO vehicles (owner_id, name, model, year, plate, mileage)
+       VALUES ($1, $2, $3, $4, $5, $6) RETURNING *`,
+      [req.user.id, name, model, year, plate, mileage]
     );
-    res.status(201).json(result.rows[0]);
-  } catch (error) {
-    console.error('Erro ao cadastrar veículo:', error);
-    res.status(500).json({ error: 'Erro ao cadastrar veículo' });
+    res.status(201).json(rows[0]);
+  } catch (err) {
+    console.error('Erro ao adicionar veículo:', err);
+    res.status(500).json({ error: 'Erro ao adicionar veículo' });
   }
 });
 
-// === ATUALIZAR VEÍCULO ===
-router.put('/:id', async (req, res) => {
-  const { id } = req.params;
-  const { brand, model, plate, year } = req.body;
-  try {
-    const result = await pool.query(
-      `UPDATE vehicles
-       SET brand = $1, model = $2, plate = $3, year = $4
-       WHERE id = $5 RETURNING *`,
-      [brand, model, plate, year, id]
-    );
-    res.json(result.rows[0]);
-  } catch (error) {
-    console.error('Erro ao atualizar veículo:', error);
-    res.status(500).json({ error: 'Erro ao atualizar veículo' });
-  }
-});
-
-// === DELETAR VEÍCULO ===
+// 🗑️ Excluir veículo
 router.delete('/:id', async (req, res) => {
-  const { id } = req.params;
   try {
-    await pool.query('DELETE FROM vehicles WHERE id = $1', [id]);
-    res.json({ message: 'Veículo removido com sucesso!' });
-  } catch (error) {
-    console.error('Erro ao remover veículo:', error);
-    res.status(500).json({ error: 'Erro ao remover veículo' });
+    await pool.query('DELETE FROM vehicles WHERE id = $1 AND owner_id = $2', [
+      req.params.id,
+      req.user.id,
+    ]);
+    res.json({ success: true });
+  } catch (err) {
+    console.error('Erro ao excluir veículo:', err);
+    res.status(500).json({ error: 'Erro ao excluir veículo' });
   }
 });
 
